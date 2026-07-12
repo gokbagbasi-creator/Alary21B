@@ -26,16 +26,37 @@ ds_list = [
 dataset = interleave_datasets(ds_list, probabilities=[0.8, 0.1, 0.1])
 
 
-def batch_iterator():
+def batch_iterator(batch_size=1000):
+    """Veri setinden text çıkarmak için iterator."""
+    batch = []
     for example in dataset:
+        # Farklı veri setlerinde 'text' field'i farklı isimlerde olabilir
+        text = None
         if "text" in example:
-            yield example["text"]
+            text = example["text"]
+        elif "content" in example:
+            text = example["content"]
+        elif "code" in example:
+            text = example["code"]
+        
+        if text and isinstance(text, str):
+            batch.append(text)
+            
+            if len(batch) == batch_size:
+                yield batch
+                batch = []
+    
+    # Kalan batch'i gönder
+    if batch:
+        yield batch
 
 
+print("Tokenizer eğitiliyor...")
 tokenizer.train_from_iterator(
     batch_iterator(),
     trainer=trainer
 )
 
-
+print("✅ Tokenizer eğitimi tamamlandı!")
 tokenizer.save("tokenizer.json")
+print("✅ Tokenizer kaydedildi!")
