@@ -1,7 +1,8 @@
-import os, shutil, torch
+import os
+import torch
 from accelerate import Accelerator
 from accelerate.utils import set_seed
-from transformers import LlamaForCausalLM, Adafactor
+from transformers import LlamaForCausalLM, LlamaConfig, Adafactor
 from torch.utils.data import DataLoader
 from dataset import get_dataset, collate_fn
 
@@ -10,7 +11,14 @@ accelerator = Accelerator(mixed_precision="bf16", gradient_accumulation_steps=8)
 output_dir = "checkpoints"
 os.makedirs(output_dir, exist_ok=True)
 
-model = LlamaForCausalLM.from_pretrained("Alary21B")
+# Model yükle
+try:
+    model = LlamaForCausalLM.from_pretrained("Alary21B")
+except:
+    print("Model bulunamadı, config'den oluşturuluyor...")
+    config = LlamaConfig.from_pretrained("Alary21B")
+    model = LlamaForCausalLM(config)
+
 model.gradient_checkpointing_enable()
 
 optimizer = Adafactor(model.parameters(), lr=1e-4, relative_step=False, scale_parameter=False)
@@ -20,20 +28,25 @@ val_dl = DataLoader(get_dataset("validation"), batch_size=4, collate_fn=collate_
 
 model, optimizer, train_dl, val_dl = accelerator.prepare(model, optimizer, train_dl, val_dl)
 
-# Resume logic
-last_ckpt = sorted([os.path.join(output_dir, d) for d in os.listdir(output_dir) if "checkpoint-" in d])
-if last_ckpt:
-    accelerator.load_state(last_ckpt[-1])
-    print(f"Resumed from {last_ckpt[-1]}")
+# Resume logic - liste boş değilse kontrol et
+last_ckpt = None
+ckpt_list = sorted([os.path.join(output_dir, d) for d in os.listdir(output_dir) if "checkpoint-" in d])
+if ckpt_list:
+    last_ckpt = ckpt_list[-1]
+    accelerator.load_state(last_ckpt)
+    print(f"Resumed from {last_ckpt}")
 
 def evaluate():
     model.eval()
     total_loss = 0
+    batch_count = 0
     with torch.no_grad():
         for batch in val_dl:
             outputs = model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"], labels=batch["input_ids"])
             total_loss += outputs.loss.item()
-    print(f"Validation Loss: {total_loss / len(val_dl)}")
+            batch_count += 1
+    avg_loss = total_loss / batch_count if batch_count > 0 else 0
+    print(f"Validation Loss: {avg_loss}")
     model.train()
 
 model.train()
@@ -54,4 +67,4 @@ for step, batch in enumerate(train_dl):
 accelerator.wait_for_everyone()
 if accelerator.is_main_process:
     accelerator.unwrap_model(model).save_pretrained("Alary21B_Final")
-
+    print("✅ Model eğitimi tamamlandı!")
