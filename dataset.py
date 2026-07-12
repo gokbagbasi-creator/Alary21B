@@ -16,6 +16,9 @@ def get_dataset(split="train", probabilities=[0.8, 0.1, 0.1]):
         load_dataset("bigcode/starcoderdata", streaming=True, split=split, trust_remote_code=True),
         load_dataset("bigcode/the-stack-v2", streaming=True, split=split, trust_remote_code=True)
     ]
+    # Probabilities toplamı 1.0 olmalı
+    total_prob = sum(probabilities)
+    probabilities = [p / total_prob for p in probabilities]
     return interleave_datasets(ds_list, probabilities=probabilities).map(tokenize_function, batched=True)
 
 def collate_fn(batch):
@@ -23,4 +26,3 @@ def collate_fn(batch):
         "input_ids": torch.tensor([item["input_ids"] for item in batch]),
         "attention_mask": torch.tensor([item["attention_mask"] for item in batch])
     }
-
