@@ -16,11 +16,12 @@ config = LlamaConfig(
 
 model = LlamaForCausalLM(config)
 
-# Model ve config kaydedilmeden önce validasyon
-print(f"Model parametreleri: {model.num_parameters():,}")
+# Model parametrelerini kontrol et (25B)
+total_params = model.num_parameters()
+print(f"Model parametreleri: {total_params:,} ({total_params/1e9:.1f}B)")
 print(f"Config kaydediliyor...")
 
-model.save_pretrained("Alary21B")
-config.save_pretrained("Alary21B")
+model.save_pretrained("Alary25B")
+config.save_pretrained("Alary25B")
 
-print("✅ Model başarıyla kaydedildi!")
+print("✅ Alary25B modeli başarıyla kaydedildi!")
