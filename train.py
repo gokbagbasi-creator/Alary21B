@@ -3,7 +3,7 @@ from accelerate import Accelerator
 from accelerate.utils import set_seed
 from transformers import LlamaForCausalLM, Adafactor
 from torch.utils.data import DataLoader
-from data_loader import get_dataset, collate_fn
+from dataset import get_dataset, collate_fn
 
 set_seed(42)
 accelerator = Accelerator(mixed_precision="bf16", gradient_accumulation_steps=8)
