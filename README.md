@@ -1,6 +1,6 @@
-# Alary21B
+# Alary25B
 
-Alary21B is an open-source large language model (LLM) developed from scratch by the AlaryLLM project.
+Alary25B is an open-source large language model (LLM) developed from scratch by the AlaryLLM project.
 
 ## Project Status
 
@@ -20,7 +20,7 @@ Alary21B is an open-source large language model (LLM) developed from scratch by 
 
 ## Features
 
-- 21B parameter Llama-style architecture
+- 25B parameter Llama-style architecture
 - Trained from scratch
 - Custom 128K BPE tokenizer
 - Long context support (2048 tokens)
@@ -46,8 +46,8 @@ Fine-tuned on **Aya Dataset** for instruction-following capability
 ## Repository Structure
 
 ```
-Alary21B/
-├── model.py                 # Creates the model architecture (21B params)
+Alary25B/
+├── model.py                 # Creates the model architecture (25B params)
 ├── tokenizer_trainer.py     # Trains the 128K BPE tokenizer
 ├── dataset.py               # Loads and tokenizes the pre-training data
 ├── train.py                 # Pre-training script (TPU optimized)
@@ -57,8 +57,8 @@ Alary21B/
 └── LICENSE                  # Apache 2.0
 
 Outputs/
-├── Alary21B/                # Pre-trained model checkpoint
-├── Alary21B_Final/          # Final pre-trained model
+├── Alary25B/                # Pre-trained model checkpoint
+├── Alary25B_Final/          # Final pre-trained model
 ├── instruction_tuning_checkpoints/  # Instruction tuning checkpoints
 └── checkpoints/             # Training checkpoints
 ```
@@ -96,14 +96,14 @@ pip install cloud-tpu-client
 
 ### Stage 1: Model Initialization
 
-Initialize the 21B parameter model architecture:
+Initialize the 25B parameter model architecture:
 
 ```bash
 python model.py
 ```
 
 **Output:**
-- `Alary21B/` - Model configuration and initial weights
+- `Alary25B/` - Model configuration and initial weights
 
 ### Stage 2: Tokenizer Training
 
@@ -137,7 +137,7 @@ accelerate launch --multi_gpu train.py
 
 **Output:**
 - `checkpoints/` - Training checkpoints (every 1000 steps)
-- `Alary21B_Final/` - Final pre-trained model
+- `Alary25B_Final/` - Final pre-trained model
 
 **TPU Performance:**
 - **TPU v4 Pod (8 chips):** ~5-8 days for 7T tokens
@@ -155,7 +155,7 @@ python instruction_train.py
 **Configuration (instruction_train.py):**
 ```python
 InstructionTuningConfig(
-    model_id="Alary21B_Final",
+    model_id="Alary25B_Final",
     dataset_name="aya_dataset",  # or local path
     num_train_epochs=3,
     per_device_train_batch_size=16,
@@ -184,7 +184,7 @@ python hf_loader.py
 **Configuration (hf_loader.py):**
 Edit the `REPO_ID` before running:
 ```python
-REPO_ID = "YourUsername/Alary21B"  # Change this
+REPO_ID = "YourUsername/Alary25B"  # Change this
 ```
 
 **Output:**
@@ -269,6 +269,22 @@ tensorboard --logdir=./logs
 | 8x A100 | 28 days | ~$10K |
 | Single A100 | 3+ months | ~$2K |
 
+## Model Specifications
+
+### Architecture Details
+
+| Parameter | Value |
+|-----------|-------|
+| **Total Parameters** | 25B |
+| **Hidden Size** | 5120 |
+| **Intermediate Size** | 20480 |
+| **Number of Layers** | 64 |
+| **Attention Heads** | 32 |
+| **KV Heads** | 8 |
+| **Vocab Size** | 128000 |
+| **Max Sequence Length** | 128000 |
+| **Position Embeddings** | RoPE |
+
 ## Model Usage
 
 ### Using the Pre-trained Model
@@ -276,7 +292,7 @@ tensorboard --logdir=./logs
 ```python
 from transformers import LlamaForCausalLM, AutoTokenizer
 
-model_id = "YourUsername/Alary21B"
+model_id = "YourUsername/Alary25B"
 model = LlamaForCausalLM.from_pretrained(model_id)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
@@ -290,7 +306,7 @@ print(tokenizer.decode(outputs[0]))
 ### Using the Instruction-Tuned Model
 
 ```python
-model_id = "YourUsername/Alary21B-Instruct"
+model_id = "YourUsername/Alary25B-Instruct"
 model = LlamaForCausalLM.from_pretrained(model_id)
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 
@@ -389,11 +405,11 @@ Apache License 2.0 - See LICENSE file for details
 
 ## Citation
 
-If you use Alary21B in your research, please cite:
+If you use Alary25B in your research, please cite:
 
 ```bibtex
-@software{alary21b,
-  title={Alary21B: An Open-Source 21B Large Language Model},
+@software{alary25b,
+  title={Alary25B: An Open-Source 25B Large Language Model},
   author={Göktürk97},
   year={2026},
   url={https://github.com/gokbagbasi-creator/Alary21B}
